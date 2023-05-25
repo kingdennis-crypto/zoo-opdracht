@@ -39,49 +39,33 @@ public class Zoo {
                 case "hello":
                     if (inputList.length == 1) {
                         getAllAnimals().forEach(Animal::sayHello);
-                        break;
-                    }
-
-                    String name = inputList[1];
-                    // TODO: Check if animal does not exist
-                    Animal animalByName = animals.get(name);
-
-                    if (animalByName == null) {
-                        System.out.println("The animal by this name does not exist");
                     } else {
-                        animalByName.sayHello();
+                        String name = inputList[1];
+                        Animal animalByName = animals.get(name);
+
+                        if (animalByName == null) {
+                            System.out.println("The animal by this name does not exist");
+                        } else {
+                            animalByName.sayHello();
+
+                        }
                     }
 
                     break;
                 case "give":
                     if (inputList.length == 1) {
                         System.out.println("Please give instructions on what to feed");
-                        break;
-                    }
-
-                    switch (inputList[1]) {
-                        case "leaves":
-                            getAnimalsByInterface(IEatLeaves.class).forEach(IEatLeaves::eatLeaves);
-                            break;
-                        case "meat":
-                            getAnimalsByInterface(IEatMeat.class).forEach(IEatMeat::eatMeat);
-                            break;
-                        default:
-                            System.out.println("Unknown food");
+                    } else {
+                        String food = inputList[1];
+                        feedAnimals(food);
                     }
                     break;
                 case "perform":
                     if (inputList.length == 1) {
                         System.out.println("Please give instructions on what to perform");
-                        break;
-                    }
-
-                    switch (inputList[1]) {
-                        case "trick":
-                            getAnimalsByInterface(ICanPerformTrick.class).forEach(ICanPerformTrick::performTrick);
-                            break;
-                        default:
-                            System.out.println("Invalid perform");
+                    } else {
+                        String action = inputList[1];
+                        performAction(action);
                     }
                     break;
                 default:
@@ -94,17 +78,34 @@ public class Zoo {
         return new ArrayList<>(animals.values());
     }
 
+    public void feedAnimals(String food) {
+        switch (food) {
+            case "leaves":
+                getAnimalsByInterface(IEatLeaves.class).forEach(IEatLeaves::eatLeaves);
+                break;
+            case "meat":
+                getAnimalsByInterface(IEatMeat.class).forEach(IEatMeat::eatMeat);
+            default:
+                System.out.println("Unknown food.");
+        }
+    }
+
+    public void performAction(String action) {
+        switch (action) {
+            case "trick":
+                getAnimalsByInterface(ICanPerformTrick.class).forEach(ICanPerformTrick::performTrick);
+                break;
+            default:
+                System.out.println("Invalid action.");
+        }
+    }
+
     public <T> List<T> getAnimalsByInterface(Class<T> interfaceObj) {
         List<T> animalsWithInterface = new ArrayList<>();
 
-        for (Animal<?> localAnimal : getAllAnimals()) {
-            Class<?>[] interfaces = localAnimal.getClass().getInterfaces();
-
-            for (Class<?> implementedInterface : interfaces) {
-                if (interfaceObj.isAssignableFrom(implementedInterface)) {
-                    animalsWithInterface.add(interfaceObj.cast(localAnimal));
-                    break;
-                }
+        for (Animal animal : animals.values()) {
+            if (interfaceObj.isInstance(animal)) {
+                animalsWithInterface.add(interfaceObj.cast(animal));
             }
         }
 
